@@ -1,16 +1,116 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .message {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
-
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <div id="name-form">
+            <input type="text" id="player-1" placeholder="Player 1 Name">
+            <input type="text" id="player-2" placeholder="Player 2 Name">
+            <button id="submit">Start Game</button>
+        </div>
+        <div id="game" style="display: none;">
+            <div class="message" id="turn-message"></div>
+            <div class="board" id="board"></div>
+        </div>
+    </div>
+    
+    <script>
+        let players = [];
+        let currentPlayer = 0;
+        let boardState = Array(9).fill(null);
+        
+        document.getElementById("submit").addEventListener("click", function() {
+            let player1 = document.getElementById("player-1").value;
+            let player2 = document.getElementById("player-2").value;
+            if (player1 && player2) {
+                players = [player1, player2];
+                document.getElementById("name-form").style.display = "none";
+                document.getElementById("game").style.display = "block";
+                document.getElementById("turn-message").innerText = `${players[currentPlayer]}, you're up!`;
+                createBoard();
+            } else {
+                alert("Please enter names for both players.");
+            }
+        });
+        
+        function createBoard() {
+            let board = document.getElementById("board");
+            board.innerHTML = "";
+            for (let i = 0; i < 9; i++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.setAttribute("data-index", i);
+                cell.addEventListener("click", handleMove);
+                board.appendChild(cell);
+            }
+        }
+        
+        function handleMove(event) {
+            let index = event.target.getAttribute("data-index");
+            if (boardState[index] === null) {
+                boardState[index] = currentPlayer === 0 ? "X" : "O";
+                event.target.innerText = boardState[index];
+                if (checkWinner()) {
+                    document.getElementById("turn-message").innerText = `${players[currentPlayer]} congratulations, you won!`;
+                    disableBoard();
+                    return;
+                }
+                currentPlayer = 1 - currentPlayer;
+                document.getElementById("turn-message").innerText = `${players[currentPlayer]}, you're up!`;
+            }
+        }
+        
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return winningCombinations.some(combination => {
+                let [a, b, c] = combination;
+                return boardState[a] !== null && boardState[a] === boardState[b] && boardState[a] === boardState[c];
+            });
+        }
+        
+        function disableBoard() {
+            document.querySelectorAll(".cell").forEach(cell => cell.removeEventListener("click", handleMove));
+        }
+    </script>
 </body>
-
 </html>
