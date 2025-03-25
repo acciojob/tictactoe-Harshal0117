@@ -13,7 +13,7 @@
             margin-top: 50px;
         }
         .board {
-            display: grid;
+            display: none;
             grid-template-columns: repeat(3, 100px);
             grid-template-rows: repeat(3, 100px);
             gap: 5px;
@@ -23,7 +23,7 @@
         .cell {
             width: 100px;
             height: 100px;
-            border: 2px solid black;
+            border: 1px solid black;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -31,86 +31,93 @@
             cursor: pointer;
         }
         .message {
-            font-size: 20px;
             margin-top: 20px;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Tic Tac Toe</h1>
-        <div id="name-form">
-            <input type="text" id="player-1" placeholder="Player 1 Name">
-            <input type="text" id="player-2" placeholder="Player 2 Name">
+        <div id="start-page">
+            <label>Player 1 <input type="text" id="player-1" placeholder="Enter Name"></label>
+            <br>
+            <label>Player 2 <input type="text" id="player-2" placeholder="Enter Name"></label>
+            <br>
             <button id="submit">Start Game</button>
         </div>
-        <div id="game" style="display: none;">
-            <div class="message" id="turn-message"></div>
-            <div class="board" id="board"></div>
+        <div id="game-page" style="display:none;">
+            <h2 class="message"></h2>
+            <div class="board" id="board">
+                <div class="cell" id="1"></div>
+                <div class="cell" id="2"></div>
+                <div class="cell" id="3"></div>
+                <div class="cell" id="4"></div>
+                <div class="cell" id="5"></div>
+                <div class="cell" id="6"></div>
+                <div class="cell" id="7"></div>
+                <div class="cell" id="8"></div>
+                <div class="cell" id="9"></div>
+            </div>
         </div>
     </div>
     
     <script>
-        let players = [];
-        let currentPlayer = 0;
-        let boardState = Array(9).fill(null);
-        
-        document.getElementById("submit").addEventListener("click", function() {
-            let player1 = document.getElementById("player-1").value;
-            let player2 = document.getElementById("player-2").value;
+        document.getElementById('submit').addEventListener('click', function() {
+            let player1 = document.getElementById('player-1').value;
+            let player2 = document.getElementById('player-2').value;
+            
             if (player1 && player2) {
-                players = [player1, player2];
-                document.getElementById("name-form").style.display = "none";
-                document.getElementById("game").style.display = "block";
-                document.getElementById("turn-message").innerText = `${players[currentPlayer]}, you're up!`;
-                createBoard();
-            } else {
-                alert("Please enter names for both players.");
+                document.getElementById('start-page').style.display = 'none';
+                document.getElementById('game-page').style.display = 'block';
+                document.getElementById('board').style.display = 'grid';
+                document.querySelector('.message').textContent = `${player1}, you're up!`;
+                startGame(player1, player2);
             }
         });
-        
-        function createBoard() {
-            let board = document.getElementById("board");
-            board.innerHTML = "";
-            for (let i = 0; i < 9; i++) {
-                let cell = document.createElement("div");
-                cell.classList.add("cell");
-                cell.setAttribute("data-index", i);
-                cell.addEventListener("click", handleMove);
-                board.appendChild(cell);
-            }
+
+        function startGame(player1, player2) {
+            let currentPlayer = player1;
+            let currentSymbol = 'X';
+            let board = ['', '', '', '', '', '', '', '', ''];
+            let cells = document.querySelectorAll('.cell');
+
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.addEventListener('click', function() {
+                    let index = parseInt(cell.id) - 1;
+                    if (!board[index]) {
+                        board[index] = currentSymbol;
+                        cell.textContent = currentSymbol;
+                        if (checkWin(board, currentSymbol)) {
+                            document.querySelector('.message').textContent = `${currentPlayer}, congratulations you won!`;
+                            disableBoard();
+                            return;
+                        }
+                        currentPlayer = (currentPlayer === player1) ? player2 : player1;
+                        currentSymbol = (currentSymbol === 'X') ? 'O' : 'X';
+                        document.querySelector('.message').textContent = `${currentPlayer}, you're up!`;
+                    }
+                });
+            });
         }
-        
-        function handleMove(event) {
-            let index = event.target.getAttribute("data-index");
-            if (boardState[index] === null) {
-                boardState[index] = currentPlayer === 0 ? "X" : "O";
-                event.target.innerText = boardState[index];
-                if (checkWinner()) {
-                    document.getElementById("turn-message").innerText = `${players[currentPlayer]} congratulations, you won!`;
-                    disableBoard();
-                    return;
-                }
-                currentPlayer = 1 - currentPlayer;
-                document.getElementById("turn-message").innerText = `${players[currentPlayer]}, you're up!`;
-            }
-        }
-        
-        function checkWinner() {
+
+        function checkWin(board, symbol) {
             const winningCombinations = [
                 [0, 1, 2], [3, 4, 5], [6, 7, 8],
                 [0, 3, 6], [1, 4, 7], [2, 5, 8],
                 [0, 4, 8], [2, 4, 6]
             ];
             return winningCombinations.some(combination => {
-                let [a, b, c] = combination;
-                return boardState[a] !== null && boardState[a] === boardState[b] && boardState[a] === boardState[c];
+                return combination.every(index => board[index] === symbol);
             });
         }
-        
+
         function disableBoard() {
-            document.querySelectorAll(".cell").forEach(cell => cell.removeEventListener("click", handleMove));
+            document.querySelectorAll('.cell').forEach(cell => cell.style.pointerEvents = 'none');
         }
     </script>
 </body>
 </html>
+
+
